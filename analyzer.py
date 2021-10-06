@@ -258,7 +258,7 @@ def calcular_puntuacion(file_xml):
     ParserXML(file_xml)
     with open(PATH_JSON_SNAP_PROJECT) as file:
         data = json.load(file)
-    name_project = (data['project_name'][0]['name'])
+    name_project = (data['project_name'][0]['name']).strip(" \r\n")
     condicionales = puntuacion_condicionales(data)
     sincronizacion = puntuacion_sincronizacion(data)
     flujo = control_flujo(data)
