@@ -1,0 +1,149 @@
+{
+    "project_name": [
+        {
+            "name": "BJC U1 Pong"
+        }
+    ],
+    "sprites": [
+        {
+            "sprite": 1,
+            "script": 1,
+            "block": "receiveGo",
+            "num_block": 1
+        },
+        {
+            "sprite": 1,
+            "script": 1,
+            "block": "setXPosition",
+            "num_block": 2
+        },
+        {
+            "sprite": 1,
+            "script": 1,
+            "block": "setYPosition",
+            "num_block": 3
+        },
+        {
+            "sprite": 1,
+            "script": 2,
+            "block": "receiveKey",
+            "num_block": 4
+        },
+        {
+            "sprite": 1,
+            "script": 2,
+            "block": "setHeading",
+            "num_block": 5
+        },
+        {
+            "sprite": 1,
+            "script": 2,
+            "block": "forward",
+            "num_block": 6
+        },
+        {
+            "sprite": 1,
+            "script": 3,
+            "block": "receiveKey",
+            "num_block": 7
+        },
+        {
+            "sprite": 1,
+            "script": 3,
+            "block": "setHeading",
+            "num_block": 8
+        },
+        {
+            "sprite": 1,
+            "script": 3,
+            "block": "forward",
+            "num_block": 9
+        },
+        {
+            "sprite": 2,
+            "script": 4,
+            "block": "gotoXY",
+            "num_block": 10
+        },
+        {
+            "sprite": 2,
+            "script": 4,
+            "block": "setHeading",
+            "num_block": 11
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "receiveGo",
+            "num_block": 12
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "gotoXY",
+            "num_block": 13
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "setHeading",
+            "num_block": 14
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "reportRandom",
+            "num_block": 15
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "doForever",
+            "num_block": 16
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "forward",
+            "num_block": 17
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "doIf",
+            "num_block": 18
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "reportTouchingObject",
+            "num_block": 19
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "turn",
+            "num_block": 20
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "doIf",
+            "num_block": 21
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "reportTouchingObject",
+            "num_block": 22
+        },
+        {
+            "sprite": 2,
+            "script": 5,
+            "block": "turn",
+            "num_block": 23
+        }
+    ],
+    "variables": [],
+    "block-definition": []
+}
