@@ -1,23 +1,23 @@
 import json
 import os
-from statistics import mean
+from statistics import mean, mode
 from parser import ParserXML
+from collections import Counter
 
 PATH_JSON_SNAP_PROJECT = os.path.dirname(os.path.abspath(__file__)) + '/' + 'data.json'
-PATH_JSON_BLOCKS_CATEGORIES = os.path.dirname(os.path.abspath(__file__)) + '/' + 'all.json'
 
 
 def blocks_script(data):
-    flag_anterior = 0
-    resultado = False
+    previous_flag = 0
+    result = False
     for element in data['sprites']:
-        flag_actual = element['script']
-        if flag_anterior == flag_actual:
-            resultado = True
+        current_flag = element['script']
+        if previous_flag == current_flag:
+            result = True
             break
         else:
-            flag_anterior = element['script']
-    return resultado
+            previous_flag = element['script']
+    return result
 
 
 def number_script(data):
@@ -37,25 +37,29 @@ def number_sprite(data):
 
 
 def puntuacion_paralelismo(data):
-    puntuacion_bajo = puntuacion_medio = puntuacion_avanzado = 0
-    # calculamos los scripts y sprites
+    score = 0
+    parallelism_counter = 0
+    list_scores = []
     n_script = number_script(data)
     n_sprite = number_sprite(data)
-    # primera condicion tabla
     basic = n_sprite == 1 and n_script >= 2
-    med = n_sprite >= 2 and n_script >= 1
-    # segunda condicion tabla
+    intermediate = n_sprite >= 2 and n_script >= 1
+    list_score_3 = ['receiveCondition', 'receiveMessage', 'receiveOnClone']
     for element in data['sprites']:
-        if (element['block'] == 'receiveGo' or element['block'] == 'receiveKey') and basic:
-            puntuacion_bajo = 1
-        elif (element['block'] == 'receiveGo' or element['block'] == 'receiveKey') and med:
-            puntuacion_medio = 2
-        elif element['block'] == 'receiveCondition' or element['block'] == 'receiveMessage' or element['block'] == 'receiveOnClone':
-            puntuacion_avanzado = 3
-            break
-        else:
-            pass
-    return max(puntuacion_bajo, puntuacion_medio, puntuacion_avanzado)
+        # receive_go_key = element['block'] == 'receiveGo' or element['block'] == 'receiveKey'
+        # evaluate y assign :=
+        if (receive_go_key := element['block'] == 'receiveGo' or element['block'] == 'receiveKey') and basic:
+            score = 1
+        elif receive_go_key and intermediate:
+            score = 2
+        elif element['block'] in list_score_3:
+            score = 3
+            # break
+        list_scores.append(score)
+    if list_scores:
+        parallelism_counter = Counter(list_scores).most_common()[0][0]
+    # return parallelism_counter
+    return score
 
 
 def puntuacion(data, switch):
@@ -67,11 +71,12 @@ def puntuacion(data, switch):
             if mayor == 3:
                 # mayor puntuacion no hace falta buscar mas
                 break
+    # moda = mode(actual)
     return mayor
 
 
 def puntuacion_condicionales(data):
-    switch_condicionales = {
+    switch_conditionals = {
         'doIf': 1,
         'doIfElse': 2,
         'reportIfElse': 2,
@@ -79,7 +84,20 @@ def puntuacion_condicionales(data):
         'reportOr': 3,
         'reportNot': 3
     }
-    return puntuacion(data, switch_condicionales)
+    list_scores = [switch_conditionals.get(element['block']) for element in data['sprites'] if
+                   switch_conditionals.get(element['block']) is not None]
+    count_scores = Counter(list_scores)
+    score2 = len(count_scores)
+    # Other method calculate conditionals.
+    if count_scores[3] and count_scores[2] and count_scores[1]:
+        score = 3
+    elif count_scores[3] and count_scores[2] or count_scores[3] and count_scores[1] or count_scores[2] and count_scores[1]:
+        score = 2
+    elif count_scores[3] or count_scores[2] or count_scores[1]:
+        score = 1
+    else:
+        score = 0
+    return score2
 
 
 def puntuacion_representacion_datos(data):
@@ -105,8 +123,9 @@ def puntuacion_representacion_datos(data):
         "changeEffect": 1,
         "changeScale": 1,
         "setScale": 1,
+        "doDeleteAttr": 2,
         "doSetVar": 2,
-        "doChangeVar": 1,
+        "doChangeVar": 2,
         "doShowVar": 2,
         "doHideVar": 2,
         "doDeclareVariables": 2,
@@ -133,32 +152,36 @@ def puntuacion_representacion_datos(data):
 
 def puntuacion_interactividad(data):
     switch_interactividad = {
-        'receiveGo': 1,
-        'receiveKey': 1,
-        'receiveInteraction': 2,
-        'reportKeyPressed': 2,
-        'doAsk': 3,
-        'reportTouchingObject': 2,
-        'reportTouchingColor': 3,
-        'reportColorIsTouchingColor': 3,
-        'reportMouseDown': 3,
-        'reportVideo': 3,
-        'reportGlobalFlag': 3,
-        'reportAudio': 3,
+        "receiveGo": 1,
+        "receiveKey": 1,
+        "receiveInteraction": 1,
+        "reportKeyPressed": 1,
+        "doAsk": 2,  # la mayoria
+        "getLastAnswer": 2,
+        "reportTouchingObject": 2,
+        "reportMouseDown": 2,
+        "reportTouchingColor": 3,
+        "reportColorIsTouchingColor": 3,
+        "doSetVideoTransparency": 3,
+        "reportVideo": 3,
+        "doSetGlobalFlag": 3,
+        "reportGlobalFlag": 3,
+        "reportAudio": 3
     }
     return puntuacion(data, switch_interactividad)
 
 
 def puntuacion_sincronizacion(data):
     switch_sincronizacion = {
-        'doWait': 1,
-        'doBroadcast': 2,
-        'receiveMessage': 2,
-        'doStopThis': 2,
-        'doPauseAll': 2,
-        'doWaitUntil': 3,
-        'doBroadcastAndWait': 3,
-        'receiveCondition': 3,
+        "doWait": 1,
+        "doBroadcast": 2,
+        "receiveMessage": 2,
+        "doStopThis": 2,
+        "doPauseAll": 2,
+        "doWaitUntil": 3,
+        "reportAskFor": 3,
+        "doBroadcastAndWait": 3,
+        "receiveCondition": 3,
         'receiveOnClone': 3
     }
     return puntuacion(data, switch_sincronizacion)
@@ -168,11 +191,12 @@ def control_flujo(data):
     switch_flujo = {
         'doForever': 2,
         'doRepeat': 2,
+        'for': 2,
         'doWaitUntil': 3,
-        'doUntil': 3,
-        'for': 3
+        'doUntil': 3
     }
     puntuacion_bajo = 0
+    # Check if the scripts has 2 or more blocks that are executed sequentially.
     resultado = blocks_script(data)
     if resultado:
         puntuacion_bajo = 1
@@ -183,57 +207,40 @@ def control_flujo(data):
 def puntuacion_abstraccion(data):
     n_script = number_script(data)
     n_sprite = number_sprite(data)
-    puntuacion_bajo = puntuacion_medio = puntuacion_avanzado = 0
-    if n_sprite == 1 and n_script >= 2:
-        puntuacion_bajo = 1
-    elif n_sprite >= 2 and n_script >= 2:
-        puntuacion_medio = 2
-    if data['block-definition']:
-        puntuacion_avanzado = 3
-    return max(puntuacion_bajo, puntuacion_medio, puntuacion_avanzado)
-
-
-def categorias(data):
-    dicc_categorias = {"motion": False, "looks": False, "sound": False,
-                       "pen": False, "control": False, "sensing": False,
-                       "operators": False, "variables": False}
-    with open(PATH_JSON_BLOCKS_CATEGORIES) as file2:
-        diccionario_all = json.load(file2)
-        for element in data['sprites']:
-            categoria = diccionario_all.get(element['block'])
-            dicc_categorias[categoria] = True
-        diversidad = 0
-        categorias = dicc_categorias.values()
-        for categoria in categorias:
-            if categoria:
-                diversidad = diversidad + 1
-        if diversidad <= 2:
-            return 1
-        elif 2 < diversidad <= 6:
-            return 2
-        else:
-            return 3
-
-
-def switch_puntuacion(media):
-    # No es valido round()
-    if media < 0.5:
-        return 0
-    elif media < 1.5:
-        return 1
-    elif media < 2.5:
-        return 2
+    count_type_blocks = Counter(element["block"] for element in data['sprites'])
+    clones = count_type_blocks.get("createClone")
+    # list_clones = [sprite["block"].count("createClone") for sprite in data["sprites"] if
+    #                  sprite["block"] == "createClone"]
+    cond_scripts = n_sprite > 1 and n_script > 1
+    conditions = [data['block-definition'], clones, cond_scripts]
+    # evaluate_conditions = sum(map(bool, conditions)) # Assign score from verified conditions.
+    # if all(conditions):
+    if data['block-definition'] and clones and cond_scripts:
+        score = 3
+    # elif sum(map(bool, conditions)) == 2:
+    # elif not all(conditions) and any(conditions): # 1 or 2 conditions.
+    elif data["block-definition"] and clones or data["block-definition"] and cond_scripts or cond_scripts and clones:
+        score = 2
+    # elif sum(map(bool, conditions)) == 1:
+    elif data['block-definition'] or clones or cond_scripts: # (cond_scripts := n_sprite > 1 and n_script > 1):
+        score = 1
     else:
-        return 3
+        score = 0
+    return score
+
+
+def calcular_level_total(data):
+    total = sum(data)
+    if total <= 7:
+        level = "Basic"
+    elif 7 < total <= 14:
+        level = "Intermediate"
+    else:
+        level = "Advanced"
+    return level, total
 
 
 def calcular_puntuacion(file_xml):
-    switch_nivel = {
-        0: 'No level',
-        1: 'Basic',
-        2: 'Intermediate',
-        3: 'Advanced'
-    }
     ParserXML(file_xml)
     with open(PATH_JSON_SNAP_PROJECT) as file:
         data = json.load(file)
@@ -243,13 +250,11 @@ def calcular_puntuacion(file_xml):
     flujo = control_flujo(data)
     abstraccion = puntuacion_abstraccion(data)
     paralelismo = puntuacion_paralelismo(data)
-    categoria = categorias(data)
     interactividad = puntuacion_interactividad(data)
     datos = puntuacion_representacion_datos(data)
-    data = [condicionales, sincronizacion, flujo, abstraccion, paralelismo, categoria, interactividad, datos]
-    media = mean(data)
-    puntua = switch_puntuacion(media)
-    level = switch_nivel.get(puntua)
-    lista_to_csv = [name_project, file_xml, level, puntua, media]
-    lista_to_csv.extend(data)
-    return lista_to_csv
+    ct_scores = [condicionales, sincronizacion, flujo, abstraccion, paralelismo, interactividad, datos]
+    level, total = calcular_level_total(ct_scores)
+    average = mean(ct_scores)
+    list_to_csv = [name_project, file_xml, level, total, average]
+    list_to_csv.extend(ct_scores)
+    return list_to_csv

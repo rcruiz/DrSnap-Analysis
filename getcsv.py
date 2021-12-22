@@ -5,16 +5,17 @@ import glob
 
 PATH = "/media/rcruiz/TOSHIBA EXT/snap_projects/snap-projects/**/**/project.xml"
 PATH2 = "/home/rcruiz/Downloads/prueba_snap/**/**/project.xml"
+# PATH3 = "/home/rcruiz/Downloads/prueba_snap2/2141/**/project.xml"
 
 
 def save_to_csv():
-    with open('results_snap_test.csv', 'a', newline='') as csvfile:
-        fieldnames = ['Project', 'Path', 'Level', 'Score', 'Average', 'Conditional',
+    with open('result_snap_metrics.csv', 'a', newline='') as csvfile:
+        fieldnames = ['Project', 'Path', 'Level', 'Total', 'Average', 'Conditional',
                       'Synchronization', 'Flow Control', 'Abstraction', 'Parallelism',
-                      'Diversity', 'User Interactivity', 'Data']
+                      'User Interactivity', 'Data']
         writer = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(fieldnames)
-        for filename in glob.glob(PATH2, recursive=False):
+        for filename in glob.glob(PATH, recursive=False):
             writer.writerow(calcular_puntuacion(filename))
 
 
